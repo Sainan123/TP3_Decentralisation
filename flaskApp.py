@@ -9,6 +9,10 @@ app = Flask(__name__)
 with open('best_svm_model.pkl', 'rb') as model_file:
     loaded_svm_model = pickle.load(model_file)
 
+# Load the saved Linear Regression model
+with open('linear_regressor_model.pkl', 'rb') as linear_model_file:
+    loaded_linear_regressor_model = joblib.load(linear_model_file)
+
 # Define the predict route
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -22,11 +26,15 @@ def predict():
         # Perform prediction using the loaded model
         predictions = loaded_svm_model.predict(df)
 
-        # Return the predictions in a standardized format
-        return jsonify({'predictions': predictions.tolist()})
+        # Perform prediction using the loaded Linear Regression model
+        linear_predictions = loaded_linear_regressor_model.predict(df)
+
+        # Return both SVM and Linear Regression predictions in a standardized format
+        return jsonify({'svm_predictions': svm_predictions.tolist(), 'linear_predictions': linear_predictions.tolist()})
 
     except Exception as e:
         return jsonify({'error': str(e)}), 400  # Return an error response if something goes wrong
+        
 
 # Run the Flask app
 if __name__ == '__main__':
